@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f8e8e4">
+	<title>Una sorpresa para ti</title>
+	<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+	<main>
+		<section class="entry-screen" id="entry-screen" aria-labelledby="entry-title">
+			<div class="entry-glow" aria-hidden="true"></div>
+			<p class="eyebrow">PARA MI PERSONA FAVORITA</p>
+			<h1 id="entry-title">Tengo algo para ti<span>♡</span></h1>
+			<p class="invitation">Abre esta pequeña sorpresa con nuestra fecha.</p>
+
+			<form class="heart-form" id="anniversary-form" novalidate>
+				<div class="heart-shape" aria-hidden="true"></div>
+				<div class="heart-content">
+					<label for="anniversary-code">Nuestra fecha</label>
+					<input
+						id="anniversary-code"
+						name="anniversary-code"
+						type="text"
+						inputmode="numeric"
+						autocomplete="off"
+						maxlength="10"
+						placeholder="DD/MM/AA"
+						aria-describedby="code-hint code-error"
+						required
+					>
+					<span class="heart-divider" aria-hidden="true">♥</span>
+					<button class="open-button" type="submit" aria-label="Abrir la sorpresa">Abrir</button>
+					<p class="code-hint" id="code-hint">Día / mes / año</p>
+					<p class="code-error" id="code-error" aria-live="polite"></p>
+				</div>
+			</form>
+			<p class="small-note">Hecho con todo mi cariño</p>
+		</section>
+
+		<section class="surprise-screen" id="surprise-screen" aria-labelledby="surprise-title" hidden>
+			<div class="night-grain" aria-hidden="true"></div>
+			<p class="surprise-kicker">UN RAMITO PARA TI</p>
+			<h2 id="surprise-title">Porque haces bonito<br>hasta lo más sencillo</h2>
+
+			<div class="bouquet" role="img" aria-label="Un ramo de siete tulipanes rosados envueltos en papel">
+				<div class="bouquet-flowers" aria-hidden="true">
+					<div class="tulip tulip-one"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+					<div class="tulip tulip-two"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+					<div class="tulip tulip-three"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+					<div class="tulip tulip-four"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+					<div class="tulip tulip-five"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+					<div class="tulip tulip-six"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+					<div class="tulip tulip-seven"><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span><span class="flower-head"><i></i><i></i><i></i></span></div>
+				</div>
+				<div class="bouquet-wrap" aria-hidden="true">
+					<div class="wrap-mouth"></div>
+					<div class="wrap-fold"></div>
+					<div class="wrap-ribbon"></div>
+					<div class="wrap-knot"><span class="bow-tail bow-tail-left"></span><span class="bow-tail bow-tail-right"></span></div>
+				</div>
+			</div>
+
+			<p class="love-message">Te amo, mi pequeñaja<span>♥</span></p>
+			<p class="love-signature">Hoy y todos los días</p>
+		</section>
+	</main>
+
+	<script>
+		const anniversaryCode = "10/07/2022";
+		const form = document.querySelector("#anniversary-form");
+		const input = document.querySelector("#anniversary-code");
+		const error = document.querySelector("#code-error");
+		const entryScreen = document.querySelector("#entry-screen");
+		const surpriseScreen = document.querySelector("#surprise-screen");
+		const formatDate = (digits) => {
+			if (digits.length <= 2) return digits.length === 2 ? `${digits}/` : digits;
+			if (digits.length <= 4) {
+				return `${digits.slice(0, 2)}/${digits.slice(2)}${digits.length === 4 ? "/" : ""}`;
+			}
+			return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+		};
+
+		form.addEventListener("submit", (event) => {
+			event.preventDefault();
+			const submittedCode = input.value.replace(/[/.\-\s]/g, "");
+			const expectedCode = anniversaryCode.replace(/[/.\-\s]/g, "");
+
+			if (submittedCode === expectedCode) {
+				entryScreen.hidden = true;
+				surpriseScreen.hidden = false;
+				document.body.classList.add("is-surprise-open");
+				return;
+			}
+
+			error.textContent = "Esa no es nuestra fecha, inténtalo otra vez ♡";
+			input.setAttribute("aria-invalid", "true");
+			input.focus();
+		});
+
+		input.addEventListener("keydown", (event) => {
+			const cursor = input.selectionStart;
+			if (event.key === "Backspace" && cursor === input.selectionEnd && cursor > 0 && input.value[cursor - 1] === "/") {
+				event.preventDefault();
+				input.setRangeText("", cursor - 2, cursor - 1, "end");
+				input.dispatchEvent(new Event("input", { bubbles: true }));
+			}
+		});
+
+		input.addEventListener("input", () => {
+			const cursor = input.selectionStart ?? input.value.length;
+			const digitsBeforeCursor = input.value.slice(0, cursor).replace(/\D/g, "").length;
+			const digits = input.value.replace(/\D/g, "").slice(0, 8);
+			const formatted = formatDate(digits);
+			const formattedCursor = formatDate(digits.slice(0, digitsBeforeCursor)).length;
+			if (input.value !== formatted) {
+				input.value = formatted;
+				input.setSelectionRange(formattedCursor, formattedCursor);
+			}
+			error.textContent = "";
+			input.removeAttribute("aria-invalid");
+		});
+	</script>
+</body>
+</html>
